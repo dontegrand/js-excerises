@@ -90,6 +90,7 @@ var guessNum = function(){
 //get the website URL
 console.log(document.URL);
 
+// split("")分割每个字符为数组，.reverse()倒转，.join("")还原字符串。
 //pop()方法从数组中删除最后一个元素，并返回该元素的值。此方法更改数组的长度
 console.log(document.URL.split('.').pop());
 
@@ -100,4 +101,12 @@ function fiveteen(){
       }while(num < 13); // 满足这个条件就一直循环
     alert('差值的2倍：' + (num-13)*2);
 }
-fiveteen();
+
+function stringPrac(check_string){
+    // slice()并不会修改数组，而是返回一个子数组
+    //substring()截取字符串，返回新的字符串
+    if(check_string == null || check_string == undefined || check_string.slice(0,2) == 'Py'){
+        return check_string;
+    }
+    return `Py${check_string}`; //ES6语法
+}

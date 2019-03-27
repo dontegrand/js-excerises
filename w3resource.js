@@ -108,5 +108,5 @@ function stringPrac(check_string){
     if(check_string == null || check_string == undefined || check_string.slice(0,2) == 'Py'){
         return check_string;
     }
-    return `Py${check_string}`; //ES6语法
+    return `Py${check_string}`; //ES6语法 `${}`
 }

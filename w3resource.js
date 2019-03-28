@@ -104,9 +104,30 @@ function fiveteen(){
 
 function stringPrac(check_string){
     // slice()并不会修改数组，而是返回一个子数组
-    //substring()截取字符串，返回新的字符串
+    //substr()截取字符串，返回新的字符串
     if(check_string == null || check_string == undefined || check_string.slice(0,2) == 'Py'){
         return check_string;
     }
     return `Py${check_string}`; //ES6语法 `${}`
 }
+
+//每个单词首字母转大写
+function toBigString(check_str){
+    splitStr = check_str.split(" ");
+    for(let i = 0; i < splitStr.length; i++){
+        splitStr[i] = splitStr[i][0].toUpperCase() + splitStr[i].substr(1);
+    }
+    return splitStr.join(" ");
+}
+// console.log(toBigString('Write a JavaScript program to capitalize the first letter of each word of a given string.'));
+
+//正则表达式对象RegExpObject.test(string)
+function isContain(str){
+    return (/a...b/).test(str) || (/b...a/).test(str);
+}
+function equalWord(str){    
+    //查找str中p字母的个数,正则表示式\g用在replace()方法时返回所有repalace掉的对象。
+    let str_p = str.replace(/[^p]/g,""); 
+    return str_p.length
+}
+// console.log(equalWord('apbcdbege'))

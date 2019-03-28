@@ -121,7 +121,7 @@ function toBigString(check_str){
 }
 // console.log(toBigString('Write a JavaScript program to capitalize the first letter of each word of a given string.'));
 
-//正则表达式对象RegExpObject.test(string)
+//正则表达式对象RegExpObject.test(string),判断string里面有没有正则的类型。
 function isContain(str){
     return (/a...b/).test(str) || (/b...a/).test(str);
 }
@@ -130,4 +130,5 @@ function equalWord(str){
     let str_p = str.replace(/[^p]/g,""); 
     return str_p.length
 }
-// console.log(equalWord('apbcdbege'))
+
+//parseInt(string_number);

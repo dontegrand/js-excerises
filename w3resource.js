@@ -75,7 +75,8 @@ var sundayYear = function(){
 
 //猜任意数
 var guessNum = function(){
-    let num = Math.ceil(Math.random() * 10) //Math.ceil向上取整。
+    //Math.ceil向上取整得到1-10之间的随机数，Math.floor向下取整，得到0-9之间的随机数。
+    let num = Math.ceil(Math.random() * 10) 
     let input = prompt('Guess the number between 1 and 10 inclusive');
     if(input == num){
         console.log('matched')

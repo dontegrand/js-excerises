@@ -138,4 +138,41 @@ function bubble_sort(a) {
     }
     return a;
 }
-console.log(bubble_sort([9,8,7,6.5,4]));
+// console.log(bubble_sort([9,8,7,6.5,4]));
+
+// 递归
+function factorial(x) {
+    if (x === 0) {
+        return 1;
+    }
+    return x * factorial(x - 1);
+}
+// console.log(factorial(5));
+
+function gcd(a,b){
+    if(!b){ //!0为true
+        return a;
+    }
+    return gcd(b,a%b);
+}
+
+var range = function(start,end){
+    if(end - start == 1){
+        console.log("No number between them");
+    }else if(end - start == 2){
+        return [end - 1];
+    }else{
+        let list = range(start,end - 1);
+        list.push(end - 1);
+        return list;
+    }
+}
+// console.log(range(2,5));
+
+var array_sum = function(array){
+    if(array.length == 1){
+        return array[0]
+    }else{
+        return array.pop() + array_sum(array);
+    }
+}

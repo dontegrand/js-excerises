@@ -1,26 +1,26 @@
-function sleep(time){
+function sleep(time) {
     let now = new Date();
-    while(true){
-        if(new Date().getTime() - now  == time){
+    while (true) {
+        if (new Date().getTime() - now == time) {
             break;
         }
     }
 }
 
-console.log("开始。。");
+// console.log("开始。。");
 // sleep(1000);
-console.log("结束");
+// console.log("结束");
 
 
 let obj = {
-    '0' : '',
-    '1' : '秒杀',
-    '2' : '满减',
-    '3' : '直降',
-    '11' : '买赠',
-    '12' : '预售',
-    '13' : '满返',
-    '14' : '团购'
+    '0': '',
+    '1': '秒杀',
+    '2': '满减',
+    '3': '直降',
+    '11': '买赠',
+    '12': '预售',
+    '13': '满返',
+    '14': '团购'
 }
 
 //原型链 与 继承
@@ -37,7 +37,7 @@ let obj = {
  *    由于实例是没有prototype属性的，prototype只有函数(准确来说是构造函数)才有的，它跟原型链没半毛钱关系。
  *    它的作用：构造函数new对象的时候，告诉构造函数新创建的对象的原型是谁。是的，只在new一个对象的时候才起作用。当你new完得到这个对象后，随便你怎么改构造函数的prototype属性，都不会影响已创建的对象的原型链。  
  */
-function Foo(name){
+function Foo(name) {
     this.name = name;
 }
 
@@ -64,11 +64,41 @@ let foo = new Foo('dontegrand');
 
 
 let obju = {}
-function change(obj){
+function change(obj) {
     obj.name = 'xiaoming'
-    obj = {name : 'daming'}
+    obj = { name: 'daming' }
     console.log(obj.name)
 }
 
-change(obju);
-console.log(obju.name);
+// change(obju);
+// console.log(obju.name);
+
+
+
+function grandFather() {
+    const a = 1
+    return function father() {
+        const b = 2
+        return function () {
+            const c = 3
+            // 下面这个语句打断点就能知道闭包是啥了
+            console.log(a, b, c)
+        }
+    }
+}
+const fn = grandFather()()
+fn()
+
+function createCounter() {
+    let counter = 1
+    const myFunction = function () {
+        counter = counter + 1
+        return counter
+    }
+    return myFunction
+}
+const increment = createCounter()
+const c1 = increment()
+const c2 = increment()
+const c3 = increment()
+console.log('example increment', c1, c2, c3)

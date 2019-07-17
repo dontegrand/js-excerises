@@ -102,3 +102,66 @@ const c1 = increment()
 const c2 = increment()
 const c3 = increment()
 console.log('example increment', c1, c2, c3)
+
+/**
+ * Person1.call(this)是让Person2拥有Person1的属性与方法。
+ */
+var Person1 = function(){
+	this.name = "DONTE"
+}
+var Person2 = function(){
+	this.getName = function(){
+		console.log(this.name);
+	}
+	Person1.call(this);
+}
+var person = new Person2();
+person.getName()
+
+var a = 1;
+var objection = function(){
+  var a = 2;
+	console.log(this.a);
+}
+objection();
+
+
+const assign = key => value => obj => ({ ...obj, [key]: value}) //对象赋值
+
+var assign = function(key){
+    console.log("--key--",key)
+    return function(value){
+        console.log("--value--",value)
+        return function(obj){
+            console.log("--",{...obj,[key]:value});
+            return {...obj,[key]:value};
+        }
+    }
+}
+
+// assign(1)("b")({2:"a"});
+let object1 = assign(3)(4)([7,8]);
+let object2 = assign(5)(6)({9:'test'});
+console.log(object1,object2);
+
+//在for循环的头部声明带有var关键字的变量会为改变量创建单个绑定（存储空间）。
+var arrayfor = [];
+for(var i = 0; i < 3; i++){
+    arrayfor.push(() => i); //三个箭头函数体重的每个‘i’都指向相同的绑定
+}
+console.log('00',arrayfor[2]())
+var newarrayfor = arrayfor.map(el =>el());
+console.log(newarrayfor) //[3,3,3]
+
+//使用闭包解决问题,或者用let声明i
+// let arrayfor = [];
+// for (var i = 0; i < 3; i++) {
+//     arrayfor[i] = (function(x) {
+//     return function() {
+//         console.log("_____",x)
+//       return x;
+//     };
+//   })(i);
+// }
+// const newarrayfor = arrayfor.map(el => el());
+// console.log(newarrayfor); // [0, 1, 2]

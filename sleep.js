@@ -128,16 +128,16 @@ objection();
 
 const assign = key => value => obj => ({ ...obj, [key]: value}) //对象赋值
 
-var assign = function(key){
-    console.log("--key--",key)
-    return function(value){
-        console.log("--value--",value)
-        return function(obj){
-            console.log("--",{...obj,[key]:value});
-            return {...obj,[key]:value};
-        }
-    }
-}
+// var assign = function(key){
+//     console.log("--key--",key)
+//     return function(value){
+//         console.log("--value--",value)
+//         return function(obj){
+//             console.log("--",{...obj,[key]:value});
+//             return {...obj,[key]:value};
+//         }
+//     }
+// }
 
 // assign(1)("b")({2:"a"});
 let object1 = assign(3)(4)([7,8]);
@@ -165,3 +165,40 @@ console.log(newarrayfor) //[3,3,3]
 // }
 // const newarrayfor = arrayfor.map(el => el());
 // console.log(newarrayfor); // [0, 1, 2]
+
+
+function tableOfX(x){
+    for(let i = 1; i <= x; i++){
+        for(let j = 1; j <= i; j++){
+            document.write(i+'*'+j+'='+i*j);
+            document.write("&nbsp")
+        }
+        document.write("<br/>");
+    }
+}
+tableOfX(7);
+
+
+
+// let objt = {};
+// function changeValue(objt){
+//   objt.name = 'ConardLi';
+//   objt = {name:'code秘密花园'};
+//   console.log('---',objt)
+// }
+// changeValue(objt);
+// console.log(objt.name); 
+
+var fna;
+function fooa() {
+	var a = 20;
+	function baz() {
+		console.log(a);
+	}
+	fna = baz;
+}
+function bar() {
+	fna();
+}
+fooa();
+bar();

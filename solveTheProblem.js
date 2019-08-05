@@ -83,3 +83,46 @@ console.log(RegExp.$2) //08
 //替换
 console.log('2019-08-05'.replace(regex_pick,"$2/$3/$1")); //  2019-08-05替换为了08/05/2019
 
+//反向引用
+// 匹配2016-06-12、2016/06/12
+let regex_backreference = /\d{4}([-|\/])\d{2}([-|\/])\d{2}/;
+console.log(regex_backreference.test("2016-06-12"))
+console.log(regex_backreference.test("2016-08/05")) //也为true
+//前后一致匹配需要用到反向引用, 下面的\1 表示前面括号匹配的内容group1
+let regex_backreference2 = /\d{4}([-|\/])\d{2}\1\d{2}/;
+console.log(regex_backreference2.test("2016-06-12")) //true
+console.log(regex_backreference2.test("2018-08/05")) //false
+// 当有分组后面又量词时
+let regex_reference_number = /(\d)+/;
+console.log("12345".match(regex_reference_number)); //此时group1为最后一次匹配的值，这里为5.
+
+// 正则实现trim函数
+function trim(str){
+    return str.replace(/^\s*|\s*$/g,'');
+}
+console.log(trim(" curry "));
+
+//正则实现首字母转换为大写
+// 回调函数入参为前面匹配到的值。
+console.log("i can do all thing".replace(/(?:^)/g,'#'))  //i#can#do#all#thing
+console.log("i can do all thing".replace(/(\s)/g,'#'))   //#i can do all thing
+function titleize(str){
+    return str.toLowerCase().replace(/(?:^|\s)\w/g,c => c.toUpperCase());
+}
+console.log(titleize('my name is curry')); //My Name Is Curry
+
+//正则实现驼峰化
+function camelize(str){
+    return str.replace(/[-_\s]+(.)?/g,(match,c) => {
+        console.log(match,c)
+        return c?c.toUpperCase():''});
+}
+console.log(camelize('-stephen-curry')); //StephenCurry
+
+//正则实现中线化函数
+function dasherize(str){
+    console.log(str.replace(/([A-Z])/g,'-$1')) //寻找大写字母添加-
+    console.log(str.replace(/([A-Z])/g,'-$1').replace(/[-_\s]+/g,'-'))//把space字符替换为-
+    return str.replace(/([A-Z])/g,'-$1').replace(/[-_\s]+/g,'-').toLowerCase();//转中线化小写
+}
+console.log(dasherize(' StePhen Curry')) //-ste-phen-curry

@@ -1,11 +1,3 @@
-// let arr = [{a:1,i:{b:2,c:3,d:4}}]
-// 不用到i，取出a,b,c,d的值
-const arr = [{a:1,i:{b:2,c:3,d:4}}];
-//i对应的ascii码为105
-const {b,c,d} = arr[0][String.fromCharCode(105)];
-// console.log(b,c,d)
-
-
 let shitString = '傻逼';
 let regstr = shitString.split('').join('([^\u4e00-\u9fa5]*?)');
 let reg = new RegExp(regstr,'g');

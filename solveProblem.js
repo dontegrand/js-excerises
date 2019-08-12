@@ -1,3 +1,26 @@
+//实现一个睡眠函数
+function sleep(time) {
+    let now = new Date();
+    while (true) {
+        if (new Date().getTime() - now == time) {
+            break;
+        }
+    }
+}
+// console.log("开始。。");
+// sleep(1000);
+// console.log("结束");
+
+let obj = {// 对象数据封装举例
+    '0': '',
+    '1': '秒杀',
+    '2': '满减',
+    '3': '直降',
+    '11': '买赠',
+    '12': '预售',
+    '13': '满返',
+    '14': '团购'
+}
 // let arr = [{a:1,i:{b:2,c:3,d:4}}]
 // 不用到i，取出a,b,c,d的值
 const arr = [{a:1,i:{b:2,c:3,d:4}}];

@@ -1,28 +1,3 @@
-function sleep(time) {
-    let now = new Date();
-    while (true) {
-        if (new Date().getTime() - now == time) {
-            break;
-        }
-    }
-}
-
-// console.log("开始。。");
-// sleep(1000);
-// console.log("结束");
-
-
-let obj = {
-    '0': '',
-    '1': '秒杀',
-    '2': '满减',
-    '3': '直降',
-    '11': '买赠',
-    '12': '预售',
-    '13': '满返',
-    '14': '团购'
-}
-
 //原型链 与 继承
 /**
  * 1.通常构造函数首字母大写。

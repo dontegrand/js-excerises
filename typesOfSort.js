@@ -67,3 +67,43 @@ function insetSort(array){
     }
     return array;
 }
+
+/**
+ * 归并排序：分-归-并。先把数组一分为二，
+ * @param {数组} array 
+ */
+function mergeSort(array){
+    console.log("test");
+    if(array.length < 2){
+        return array;
+    }
+    let m = Math.floor(array.length / 2);
+    let left = mergeSort(array.slice(0,m));
+    let right = mergeSort(array.slice(m));
+
+    return merge(left,right);
+}
+
+function merge(left,right){
+    console.log("--",left,"-1-",right)
+    let result = [];
+    let i = 0, j = 0;
+    while(i < left.length && j < right.length){
+        if(left[i] <= right[j]){
+            result.push(left[i++]);
+        }else{
+            result.push(right[j++]);
+        }
+    }
+    if(i < left.length){
+        result.push(...left.slice(i));
+    }
+    if(j < right.length){
+        result.push(...right.slice(j));
+    }
+    console.log("-2-",result);
+    return result;
+};
+
+
+console.log(mergeSort(test_array));

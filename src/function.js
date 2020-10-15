@@ -176,3 +176,39 @@ var array_sum = function(array){
         return array.pop() + array_sum(array);
     }
 }
+
+
+const counter = (function () {
+    let privateValue = 0
+    function changeBy (val) {
+       privateValue += val
+    }
+    return { 
+        increment: () => changeBy(1),
+        decrement: () => changeBy(-1) ,
+        value: () => privateValue
+    }
+})()
+console.log(counter.value()) // 0
+counter.increment(); counter.increment();
+console.log(counter.value()) // 2
+counter.decrement()
+console.log(counter.value()) // 1
+
+
+const makeCounter = () => {
+    let counter = 0
+    function changeBy (val) {
+        counter += val
+    }
+    function COUNTER () {}
+    COUNTER.prototype.increment = () => changeBy(1)
+    COUNTER.prototype.decrement = () => changeBy(-1)
+    COUNTER.prototype.value = () => counter
+    return new COUNTER()
+  }
+  let fn1 = makeCounter()
+  let fn2 = makeCounter()
+  console.log(fn1.value(), fn2.value()) // 0 0
+  fn1.increment()
+  console.log(fn1.value(), fn2.value()) // 1 0

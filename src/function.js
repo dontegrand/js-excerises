@@ -212,3 +212,21 @@ const makeCounter = () => {
   console.log(fn1.value(), fn2.value()) // 0 0
   fn1.increment()
   console.log(fn1.value(), fn2.value()) // 1 0
+
+/**
+ * 简化字符串
+ */
+
+let str = "abbbbfffccddefff";
+const reg = /(.)\1+/g;
+const matchArr = str.match(reg)
+const simpleArr = matchArr.map(item => item.charAt(0) + item.length)
+const targetArr = Array.from(new Set(simpleArr))
+
+const targetStr = str.replace(reg, (match, key, index, source) => {
+    const aimArr = targetArr.filter(item => item[0] === match[0] && item[1] == match.length)
+    if (aimArr.length) return match = aimArr[0]
+})
+console.log(targetStr) //ab4f3c2d2ef3
+
+

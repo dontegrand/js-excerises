@@ -42,12 +42,12 @@ function shallowCopy(p){
     return c;
 }
 a.key2 = ['curry','stephen'] //a = {key1:'111',key2:['curry','stephen']}
-var bl = shallowCopy(a); //bl = {key1:'111',key2:['curry','stephen']}
-console.log(a,bl)
-bl.key3 = '333' //bl = {key1:'111',key2:['curry','stephen'],key3:'333'}
-bl.key2.push('allen') //bl = {key1:'111',key2:['curry','stephen','allen'],key3:'333'} 
+let bl = shallowCopy(a); //bl = {key1:'111',key2:['curry','stephen']}
+bl.key3 = '333'
+bl.key2.push('allen')
 bl.key1 += '2';
-console.log(bl.key1,a.key1,bl.key2,a.key2) //1112,111,['curry','stephen','allen']
+console.log(bl) // { key1: '1112', key2: [ 'curry', 'stephen', 'allen' ], key3: '333' }
+console.log(a) // { key1: '111', key2: [ 'curry', 'stephen', 'allen' ] }
 
 
 /**
@@ -59,7 +59,6 @@ console.log(bl.key1,a.key1,bl.key2,a.key2) //1112,111,['curry','stephen','allen'
 let al = {key1:'111'};
 function deepCopy(p,c){
     var c = c || {};
-    console.log(Math.random(),c);
     for(let i in p){
         if(typeof p[i] === 'object'){
             c[i] = (p[i].constructor === Array)?[]:{};
@@ -76,3 +75,56 @@ bval = deepCopy(al,bval);
 console.log(al,bval)
 bval.key2.push('allen');
 console.log(bval.key2,al.key2)
+
+/**
+ * 判断数据类型
+ */
+function getDataType(data) {
+    const temp = Object.prototype.toString.call(data)
+    const arr = temp.match(/\b\w+\b/g)
+    console.log(arr)
+    return (arr.length < 2) ? 'Undefined' : arr[1]
+}
+console.log(getDataType(Symbol()))
+/**
+ * 判断两个对象是否相同
+ */
+class ObjectUtils{
+    getDataType(data) {
+      const temp = Object.prototype.toString.call(data);
+      const type = temp.match(/\b\w+\b/g);
+      return (type.length < 2) ? 'Undefined' : type[1];
+    }
+    iterable(data){
+      return ['Object', 'Array'].includes(this.getDataType(data));
+    }
+    isObjectChangedSimple(source, comparison){
+      const _source = JSON.stringify(source)
+      const _comparison = JSON.stringify({...source,...comparison})
+      return _source !== _comparison
+    }
+    isObjectChanged(source, comparison) {
+      if (!this.iterable(source)) {
+        throw new Error(`source should be a Object or Array , but got ${this.getDataType(source)}`);
+      }
+      if (this.getDataType(source) !== this.getDataType(comparison)) {
+        return true;
+      }
+      const sourceKeys = Object.keys(source);
+      const comparisonKeys = Object.keys({...source, ...comparison});
+      if (sourceKeys.length !== comparisonKeys.length) {
+        return true;
+      }
+      return comparisonKeys.some(key => {
+        if (this.iterable(source[key])) {
+          return this.isObjectChanged(source[key], comparison[key]);
+        } else {
+          return source[key] !== comparison[key];
+        }
+      });
+    }
+  }
+  ObjectUtils.isObjectChanged(tar1, tar2)
+  ObjectUtils.isObjectChangedSimple(tar1, tar2)
+  
+  

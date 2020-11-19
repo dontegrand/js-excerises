@@ -1,3 +1,4 @@
+
 //实现一个睡眠函数
 function sleep(time) {
     let now = new Date();
@@ -27,82 +28,39 @@ const arr = [{a:1,i:{b:2,c:3,d:4}}];
 //i对应的ascii码为105
 const {b,c,d} = arr[0][String.fromCharCode(105)];
 // console.log(b,c,d)
-
-/**
- * 浅拷贝，基本数据类型的值拷贝时，拷贝值(内存空间)，
- *        引用数据类型的值拷贝时，拷贝的是引用地址。
- *        所以操作一个地址时，共同的内存空间变化了，影响其他的引用地址的值。
- */
-let a = {key1:'111'}
-function shallowCopy(p){
-    let c = {}
-    for(let i in p){
-        c[i] = p[i];
-    }
-    return c;
-}
-a.key2 = ['curry','stephen'] //a = {key1:'111',key2:['curry','stephen']}
-let bl = shallowCopy(a); //bl = {key1:'111',key2:['curry','stephen']}
-bl.key3 = '333'
-bl.key2.push('allen')
-bl.key1 += '2';
-console.log(bl) // { key1: '1112', key2: [ 'curry', 'stephen', 'allen' ], key3: '333' }
-console.log(a) // { key1: '111', key2: [ 'curry', 'stephen', 'allen' ] }
-
-
-/**
- * 深拷贝
- * 把父对象中所有属于对象的属性类型都遍历赋给子对象。
- * 遍历的过程就是为了进行把引用传递改为值传递，重新开辟新的内存空间。
- * 所以后续对bval的操作不会影响al，因为他们不是指向同一内存空间。
- */
-let al = {key1:'111'};
-function deepCopy(p,c){
-    var c = c || {};
-    for(let i in p){
-        if(typeof p[i] === 'object'){
-            c[i] = (p[i].constructor === Array)?[]:{};
-            deepCopy(p[i],c[i]);
-        }else{
-            c[i] = p[i];
-        }
-    }
-    return c;
-}
-al.key2 = ['curry','stephen']; //al = {key1:'111',key2:['curry','stephen']}
-let bval = {};
-bval = deepCopy(al,bval);
-console.log(al,bval)
-bval.key2.push('allen');
-console.log(bval.key2,al.key2)
-
-/**
- * 判断数据类型
- */
-function getDataType(data) {
-    const temp = Object.prototype.toString.call(data)
-    const arr = temp.match(/\b\w+\b/g)
-    console.log(arr)
-    return (arr.length < 2) ? 'Undefined' : arr[1]
-}
-console.log(getDataType(Symbol()))
-/**
- * 判断两个对象是否相同
- */
 class ObjectUtils{
+    /**
+     * 判断两个对象是否相同
+     */
     getDataType(data) {
       const temp = Object.prototype.toString.call(data);
       const type = temp.match(/\b\w+\b/g);
       return (type.length < 2) ? 'Undefined' : type[1];
     }
+    /**
+     * 判断对象是不是引用数据类型
+     * @param {*} data 
+     */
     iterable(data){
       return ['Object', 'Array'].includes(this.getDataType(data));
     }
+    /**
+     * 比较两个简单对象是否发生了变化(相等)
+     * @param {} source 
+     * @param {*} comparison 
+     */
     isObjectChangedSimple(source, comparison){
       const _source = JSON.stringify(source)
+      // {...source, ...comparison} 得到的对象包括source中所有k-value与comparison的所有k-value，
+      // 如果二者key相同时，得到的对象会以comparison的value为结果，这样确保得到的对象包含source，省去判异的过程。
       const _comparison = JSON.stringify({...source,...comparison})
       return _source !== _comparison
     }
+    /**
+     * 比较两个复杂对象是否发生了变化(相等)
+     * @param {*} source 
+     * @param {*} comparison 
+     */
     isObjectChanged(source, comparison) {
       if (!this.iterable(source)) {
         throw new Error(`source should be a Object or Array , but got ${this.getDataType(source)}`);
@@ -111,7 +69,7 @@ class ObjectUtils{
         return true;
       }
       const sourceKeys = Object.keys(source);
-      const comparisonKeys = Object.keys({...source, ...comparison});
+      const comparisonKeys = Object.keys({...source, ...comparison}); 
       if (sourceKeys.length !== comparisonKeys.length) {
         return true;
       }
@@ -123,8 +81,71 @@ class ObjectUtils{
         }
       });
     }
+    /**
+     * 浅克隆，把目标对象的k-value，依次克隆到结果对象上，每一次克隆可能克隆基本类型或者引用类型
+     * 当value是引用数据类型时，克隆传递的引用，导致改变目标对象的value，结果对象的value也会变。
+     * @param {*} target 
+     */
+    shallowCopy(target) {
+      let result = {}
+      for (let i in target) {
+        result[i] = target[i]
+      }
+      return result
+    }
+    /**
+     * 深克隆,把目标对象的k-value，依次克隆到结果对象上，每一次克隆都是克隆基本类型，值传递，
+     * 所以结果对象的value都是新的内存空间，不会随着目标对象的value改变而改变。
+     * @param {*} target 
+     * @param {*} res 
+     * @return 克隆得到的对象
+     */
+    deepCopy(target, res) {
+      let result = res || {}
+      for (let i in target) {
+        if (this.iterable(target[i])) {
+          result[i] = this.getDataType(target[i]) === 'Array' ? [] : {}
+          this.deepCopy(target[i], result[i])
+        } else {
+          result[i] = target[i]
+        }
+      }
+      return result
+    }
+    /**
+     * 数组的深克隆
+     * @param {*} target 
+     */
+    deepArrayCopy(target) {
+      // 1.for循坏，略
+      // 2.concat方法
+      // return target.concat()
+      // 3.slice方法
+      // return target.slice(0)
+      // 4. ...扩展运算符合
+      let [...arr] = target
+      return arr
+    }
+    /**
+     * 引用类型深克隆
+     */
+    mutilDeepCopy(target) {
+      if (this.getDataType(target) === 'Array') return this.deepArrayCopy(target)
+      else if (this.getDataType(target) === 'Object') return this.deepCopy(target)
+    }
   }
-  ObjectUtils.isObjectChanged(tar1, tar2)
-  ObjectUtils.isObjectChangedSimple(tar1, tar2)
-  
-  
+const utils  = new ObjectUtils()
+const str1 = [{a: [1,3,4]}, {b: {b1: '0000'}}, {c: 3}]
+const str2 = [{a: 1}, {b: 4}, {c: 3}]
+const str3 = {a: [1,3,4], b: {b1: '0000'}, c: '888'}
+// console.log(utils.isObjectChanged(str1, str2))
+const str4 = utils.shallowCopy(str3)
+const str5 = utils.mutilDeepCopy(str2)
+// console.log(str4)
+console.log(str5)
+
+// str3.a.push(5)
+
+// console.log(str4)
+// console.log(str5)
+

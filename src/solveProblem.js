@@ -143,9 +143,48 @@ const str4 = utils.shallowCopy(str3)
 const str5 = utils.mutilDeepCopy(str2)
 // console.log(str4)
 console.log(str5)
-
 // str3.a.push(5)
-
 // console.log(str4)
 // console.log(str5)
+class MyPromise {
+  callbacks = []
+  state = 'pending'
+  value = null
+  constructor(fn) {
+    // 构造函数里直接执行业务函数, 形参为自己的resolve函数
+    const resolve = this._resolve.bind(this)
+    fn(resolve)
+  }
+  then(cb) {
+    // 返回后邻promise形成promise链
+    return new MyPromise(resolve => {
+      const link = {cb, resolve}
+      this._handle(link)
+    })
+  }
+  // 根据状态决定是注册还是执行callback
+  _handle({cb = null, resolve}) {
+    // 如果当前promise还是pending，就注册cb完结束了，等着resolve
+    if (this.state === 'pengding') return this.callbacks.push({cb, resolve}) 
+    // 如果当前promise非pending状态，并且cb为空即没有then接着了，就执行后邻promise的cb
+    if (!cb) return resolve(this.value)
+    // 如果当前promise非pending状态，并且cb不为空，就执行当前promise链的cb，
+    const cbPromise = cb(this.value)
+    // 继续后邻promise
+    resolve(cbPromise)
+  }
+  // 改变状态，保存值并执行cb
+  _resolve(val) {
 
+    // 如果promise链的resolve的也是promise，就递归then，也就是说当前的promise实力的状态要依赖
+    // resolve的值的promise实例的状态。
+    if (val && (typeof val === 'object' || typeof val === 'function')) {
+      let then = val.then
+      if (typeof then === 'function') return then.call(val, this._resolve.bind(this))
+    }
+
+    this.state = 'resolved'
+    this.value = val
+    this.callbacks.forEach(link => this._handle(link))
+  }
+}

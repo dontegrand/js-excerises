@@ -93,6 +93,7 @@ class ObjectUtils{
       }
       return result
     }
+
     /**
      * 深克隆,把目标对象的k-value，依次克隆到结果对象上，每一次克隆都是克隆基本类型，值传递，
      * 所以结果对象的value都是新的内存空间，不会随着目标对象的value改变而改变。
@@ -143,48 +144,177 @@ const str4 = utils.shallowCopy(str3)
 const str5 = utils.mutilDeepCopy(str2)
 // console.log(str4)
 console.log(str5)
-// str3.a.push(5)
-// console.log(str4)
-// console.log(str5)
-class MyPromise {
+
+// 1. promise要求构造函数的参数(使用promise时对应的就是业务函数)立即执行。
+// 2. promise要求有then属性，then的参数cb是promise的回调，返回一个新的promise，并把当前promise的cb和新promise的resolve关联放入
+//    callbacks的回调队列中，这是形成promise链的关键。
+// 3. 实例执行resolve方法，就是改变promise的状态，保存了promise的值value，并执行队列里的cbs回调。
+// 4. 实例调用then方法除了在状态为pending时把关联的对象放入callbacks队列中之外，在状态为非pending时，就去执行当前promise的cb，返回值作为
+//    后一个promise的值value。
+// 5. 如果cb返回值也是一个promise，那就要把这个promise加入到promise链里面，去依赖当前的promise的状态去走。
+class APromise {
   callbacks = []
   state = 'pending'
   value = null
+
   constructor(fn) {
-    // 构造函数里直接执行业务函数, 形参为自己的resolve函数
-    const resolve = this._resolve.bind(this)
-    fn(resolve)
+    // 改变实例中this的指向为这个APormise类
+    fn(this._resolve.bind(this), this._reject.bind(this))
   }
-  then(cb) {
-    // 返回后邻promise形成promise链
-    return new MyPromise(resolve => {
-      const link = {cb, resolve}
+
+  then(cb, errorcb) {
+    return new APromise((resolve, reject) => {
+      const link = {
+        cb: cb || null, // 前promise的回调cb
+        resolve: resolve, // 后promise的业务函数的resolve参数
+        errorcb: errorcb || null, // 前promise的错误回调errorcb
+        reject: reject // 后promise的业务函数的reject参数
+      }
       this._handle(link)
     })
   }
-  // 根据状态决定是注册还是执行callback
-  _handle({cb = null, resolve}) {
-    // 如果当前promise还是pending，就注册cb完结束了，等着resolve
-    if (this.state === 'pengding') return this.callbacks.push({cb, resolve}) 
-    // 如果当前promise非pending状态，并且cb为空即没有then接着了，就执行后邻promise的cb
-    if (!cb) return resolve(this.value)
-    // 如果当前promise非pending状态，并且cb不为空，就执行当前promise链的cb，
-    const cbPromise = cb(this.value)
-    // 继续后邻promise
-    resolve(cbPromise)
+  // 1.1 新增catch方法，then方法的改版，对应catch到的error通过reject返回出来。
+  catch(onError) {
+    return this.then(null, onError)
   }
-  // 改变状态，保存值并执行cb
-  _resolve(val) {
+  // 1.2 新增finally方法，无关state的状态是fulfilled还是rejected，只需返回拿到最终的值即可。
+  finally(onDone) {
+    if (typeof onDone !== 'function') return this.then()
+    // 如果参数是个
+    let Promise = this.constructor
+    return this.then(
+      value => Promise.resolve(onDone()).then(() => value),
+      reason => Promise.resolve(onDone()).then(() => {throw reason})
+    )
+  }
 
-    // 如果promise链的resolve的也是promise，就递归then，也就是说当前的promise实力的状态要依赖
-    // resolve的值的promise实例的状态。
-    if (val && (typeof val === 'object' || typeof val === 'function')) {
-      let then = val.then
-      if (typeof then === 'function') return then.call(val, this._resolve.bind(this))
+  _handle(link) {
+    // 如果当前promise还是pending，就注册cb完结束了，等着resolve
+    if (this.state === 'pending') {
+      this.callbacks.push(link)
+      return
+    }
+    // 如果当前promise非pending状态，并且cb为空即没有then接着了，就执行后邻promise的cb
+    let cb = this.state === 'fulfilled' ? link.cb : link.errorcb
+
+    if (!cb) {
+      cb = this.state === 'fulfilled' ? link.resolve : link.reject
+      cb(this.value)
+      return
     }
 
-    this.state = 'resolved'
-    this.value = val
+    // 如果当前promise非pending状态，并且cb不为空，就执行当前promise链的cb，
+    let ret = cb(this.value)
+    // 继续后邻promise
+    cb = this.state === 'fulfilled' ? link.resolve : link.reject
+    cb(ret)
+
+    // 1.1 新增catch方法对应改造handle
+    let ret;
+    try {
+      ret = cb(this.value)
+      cb = this.state === 'fulfilled' ? link.resolve : link.reject
+    } catch (error) {
+      ret = error
+      cb = link.reject
+    } finally {
+      cb(ret)
+    }
+
+  }
+
+  _resolve(value) {
+    // 当前promise的cb回调返回值是一个promise时， promise有then、resolve等方法。
+    if (value && (typeof value === 'object' || typeof value === 'function')) {
+      let then = value.then
+      if (typeof then === 'function') {
+        // 因为返回的promise的状态要依赖当前的promise的状态，所以把当前promise的resolve值作为后promise的回调。
+        // 执行then方法就是关联当前的promise和后一个promise，按状态来决定是注册还是执行
+        then.call(value, this._resolve.bind(this), this._reject.bind(this))
+        return
+      }
+    }
+
+    this.state = 'fulfilled'
+    this.value = value
     this.callbacks.forEach(link => this._handle(link))
   }
+
+  _reject(error) {
+    this.state = 'rejected'
+    this.value = error
+    this.callbacks.forEach(link => this._handle(link))
+  }
+
+  // 1.3 静态方法：Promise.resolve(value) 
+  static resolve(value) {
+    if (value && value instanceof Promise) {
+      // value是一个promise，直接返回promise
+      return value;
+    } else if (value && typeof value === 'object' && typeof value.then === 'function') {
+      // value是一个具有then属性的对象，就返回新的promise并执行他的then
+      let then = value.then;
+      return new Promise(resolve => {
+        then(resolve);
+      });
+    } else if (value) {
+      // value是一个基本类型， 直接resolve出value
+      return new Promise(resolve => resolve(value));
+    } else {
+      // value没有，就返回新的promise
+      return new Promise(resolve => resolve());
+    }
+  }
+  // 1.4 静态方法：Promise.reject(value)
+  static reject(value) {
+    if (value && typeof value === 'object' && typeof value.then === 'function') {
+      // value是一个promise，就返回新的promise并执行他的then，固定传reject状态
+      let then = value.then;
+      return new Promise((resolve, reject) => {
+        then(reject);
+      });
+    } else {
+      // 其他都返回新的reject状态的promise
+      return new Promise((resolve, reject) => reject(value));
+    }
+  }
+  // 1.5 静态方法：Promise.all(promises), 传入promises数组，等所有promise都fulfilled后，返回按promise实例顺序的result数组。
+  static all(promises) {
+    return new Promise((resolve, reject) => {
+      let resolvesCount = 0
+      const total = promises.length
+      const resArr = Array.from({length: total})
+      promises.forEach((promise, index) => {
+        Promise.resolve(promise).then(res => {
+          resolvesCount ++ 
+          resArr[index] = res
+          if (resolvesCount === total) {
+            resolve(resArr)
+          }
+        })
+      })
+    }, reason => this.reject(reason))
+  }
+  // 1.6 静态方法：Promise.race(promises)，传入promises数组，返回数组中最新变为fulfilled状态的promise的result
+  static race(promises) {
+    return new Promise((resolve, reject) => {
+      for(let i = 0; i <= promises.length; i ++) {
+        Promise.resolve(promises[i]).then(res => {
+          return resolve(res)
+        }, reason => reject(reason))
+      }
+    })
+  }
 }
+
+// new APromise((resolve, reject) => {
+
+// }).then(rse => {
+
+// }, error => {
+  
+// }).catch(error => {
+
+// }).finally(onDone) {
+//  console.log(onDone)
+// }

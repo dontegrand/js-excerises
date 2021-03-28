@@ -40,3 +40,16 @@ function throttle(fn, delay) {
 //原理：一直记录当前时间，如果下一次触发的时间跟当前时间差距大于了设置的延迟时间delay(500)时
 //就执行一次fn(),然后把当前时间再次记下。
 window.addEventListener('scroll', throttle(handle, 500));
+
+
+let xhr = new XMLHttpRequest()
+xhr.open('GET', url, true)
+xhr.send('test')
+xhr.setRequestHeader('token', '123')
+xhr.onreadystatechange = () => {
+  if (xhr.readyState) {
+    if (xhr.state === 200) {
+      console.log(xhr.responseText)
+    }
+  }
+}
